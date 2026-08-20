@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — NGO Connect</title>
+  <meta name="description" content="NGO Connect dashboard for managing your team, calendar, meetings, and announcements.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR
+       ═══════════════════════════════════════════════════════ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sb-logo">
+      <div class="sb-logo-icon">🤝</div>
+      <div>
+        <div class="sb-logo-name">NGO Connect</div>
+        <div class="sb-org" id="sb-org">Loading…</div>
+      </div>
+    </div>
+
+    <nav class="sb-nav">
+
+      <!-- Shared -->
+      <div class="sb-section">
+        <div class="sb-section-title">Main</div>
+        <div class="nav-item active" data-section="overview" onclick="showSection('overview')">
+          <i class="bi bi-grid-1x2 nav-icon"></i> Overview
+        </div>
+      </div>
+
+      <!-- Admin only -->
+      <div class="sb-section" data-role="admin">
+        <div class="sb-section-title">Management</div>
+        <div class="nav-item" data-section="approvals" data-role="admin" onclick="showSection('approvals')">
+          <i class="bi bi-person-check nav-icon"></i> Pending Approvals
+          <span class="nav-badge hidden" id="pendBadge">0</span>
+        </div>
+        <div class="nav-item" data-section="team" data-role="admin" onclick="showSection('team')">
+          <i class="bi bi-people nav-icon"></i> Team Members
+        </div>
+        <div class="nav-item" data-section="calendar" data-role="admin" onclick="showSection('calendar')">
+          <i class="bi bi-calendar3 nav-icon"></i> Calendar
+        </div>
+        <div class="nav-item" data-section="announcements" data-role="admin" onclick="showSection('announcements')">
+          <i class="bi bi-megaphone nav-icon"></i> Announcements
+        </div>
+        <div class="nav-item" data-section="meetings" data-role="admin" onclick="showSection('meetings')">
+          <i class="bi bi-calendar2-check nav-icon"></i> Meeting Requests
+        </div>
+      </div>
+
+      <!-- Employee only -->
+      <div class="sb-section" data-role="employee">
+        <div class="sb-section-title">My Workspace</div>
+        <div class="nav-item" data-section="calendar" data-role="employee" onclick="showSection('calendar')">
+          <i class="bi bi-calendar3 nav-icon"></i> My Calendar
+        </div>
+        <div class="nav-item" data-section="request-meeting" data-role="employee" onclick="showSection('request-meeting')">
+          <i class="bi bi-calendar-plus nav-icon"></i> Request Meeting
+        </div>
+        <div class="nav-item" data-section="newsfeed" data-role="employee" onclick="showSection('newsfeed')">
+          <i class="bi bi-newspaper nav-icon"></i> News Feed
+        </div>
+        <div class="nav-item" data-section="my-meetings" data-role="employee" onclick="showSection('my-meetings')">
+          <i class="bi bi-clock-history nav-icon"></i> My Meetings
+        </div>
+      </div>
+
+      <!-- Shared — Directory link -->
+      <div class="sb-section">
+        <div class="sb-section-title">Discover</div>
+        <a href="directory.html" class="nav-item" style="text-decoration:none;">
+          <i class="bi bi-building nav-icon"></i> NGO Directory
+          <i class="bi bi-arrow-up-right-square" style="margin-left:auto;font-size:11px;opacity:.5;"></i>
+        </a>
+      </div>
+
+    </nav>
+
+    <div class="sb-footer">
+      <div class="sb-user" onclick="logout()" title="Click to logout">
+        <div class="sb-avatar" id="sb-avatar">A</div>
+        <div style="flex:1;min-width:0;">
+          <div class="sb-uname" id="sb-uname">Loading…</div>
+          <div class="sb-urole" id="sb-urole">Role</div>
+        </div>
+        <i class="bi bi-box-arrow-right" style="color:rgba(255,255,255,.3);font-size:14px;flex-shrink:0;"></i>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN CONTENT
+       ═══════════════════════════════════════════════════════ -->
+  <div class="main-content">
+
+    <!-- Top Header -->
+    <header class="top-header">
+      <div class="hd-left">
+        <button class="btn btn-ghost btn-icon menu-btn" style="display:none;" onclick="toggleSidebar()">
+          <i class="bi bi-list" style="font-size:20px;"></i>
+        </button>
+        <div>
+          <div class="hd-title" id="hdTitle">Dashboard</div>
+          <div class="hd-sub"   id="hdSub"></div>
+        </div>
+      </div>
+      <div class="hd-right">
+        <span class="hd-user-meta" id="hd-user"></span>
+        <span class="hd-user-meta" style="color:var(--border);">•</span>
+        <span class="hd-user-meta" id="hd-role" style="font-size:12px;color:var(--text-3);font-weight:400;"></span>
+        <button class="logout-btn" onclick="logout()">
+          <i class="bi bi-box-arrow-right"></i> Logout
+        </button>
+      </div>
+    </header>
+
+    <main class="page-content" id="pageContent">
+
+      <!-- ── PENDING SCREEN ──────────────────────────────── -->
+      <div id="pendingScreen" class="hidden">
+        <div class="pending-screen">
+          <div class="pending-illo">⏳</div>
+          <h2>Awaiting Admin Approval</h2>
+          <p style="color:var(--text-2);margin:var(--s5) 0 var(--s7);line-height:1.75;">
+            Your request to join <strong id="pendingOrg"></strong> is being reviewed.<br>
+            Your admin will approve or reject your request shortly.
+          </p>
+          <div class="alert alert-info" style="max-width:420px;margin:0 auto var(--s7);">
+            <i class="bi bi-info-circle-fill"></i>
+            Once approved, please refresh this page or sign in again to access your workspace.
+          </div>
+          <button class="btn btn-outline" onclick="logout()">
+            <i class="bi bi-box-arrow-left"></i> Back to Login
+          </button>
+        </div>
+      </div>
+
+      <!-- ── OVERVIEW ────────────────────────────────────── -->
+      <div class="page-section" id="sec-overview">
+        <!-- Quote Banner -->
+        <div class="quote-banner">
+          <div class="qb-text"   id="qbText">"…"</div>
+          <div class="qb-author" id="qbAuthor">—</div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid" style="margin-bottom:var(--s7);">
+          <div class="stat-card">
+            <div class="stat-icon teal"><i class="bi bi-people-fill"></i></div>
+            <div><div class="stat-value" id="s1v">—</div><div class="stat-label" id="s1l">—</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon amber"><i class="bi bi-person-exclamation"></i></div>
+            <div><div class="stat-value" id="s2v">—</div><div class="stat-label" id="s2l">—</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon green"><i class="bi bi-calendar3"></i></div>
+            <div><div class="stat-value" id="s3v">—</div><div class="stat-label" id="s3l">—</div></div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-icon blue"><i class="bi bi-clock-history"></i></div>
+            <div><div class="stat-value" id="s4v">—</div><div class="stat-label" id="s4l">—</div></div>
+          </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Recent Activity</h3>
+          </div>
+          <div id="actList"></div>
+        </div>
+      </div>
+
+      <!-- ── APPROVALS (Admin) ───────────────────────────── -->
+      <div class="page-section" id="sec-approvals">
+        <div class="page-hd">
+          <div>
+            <h1>Pending Approvals</h1>
+            <p>Review and approve employees requesting to join your organisation</p>
+          </div>
+        </div>
+        <div id="approvalsCnt"></div>
+      </div>
+
+      <!-- ── TEAM (Admin) ────────────────────────────────── -->
+      <div class="page-section" id="sec-team">
+        <div class="page-hd">
+          <div>
+            <h1>Team Members</h1>
+            <p>All active members of your organisation</p>
+          </div>
+          <div style="background:var(--primary-subtle);border:1.5px dashed var(--primary);border-radius:var(--r);padding:10px 16px;text-align:center;">
+            <div style="font-size:11px;font-weight:700;color:var(--primary);text-transform:uppercase;letter-spacing:.07em;">Organisation Code</div>
+            <div style="font-size:1.375rem;font-weight:800;color:var(--primary);letter-spacing:.14em;margin-top:2px;" id="orgCode">—</div>
+          </div>
+        </div>
+        <div id="teamCnt"></div>
+      </div>
+
+      <!-- ── CALENDAR (Both) ─────────────────────────────── -->
+      <div class="page-section" id="sec-calendar">
+        <div class="page-hd">
+          <div>
+            <h1>Calendar &amp; Events</h1>
+            <p>View and manage organisational events and holidays</p>
+          </div>
+          <button class="btn btn-primary" id="calCreateBtn" onclick="openCreateEvent()">
+            <i class="bi bi-plus-lg"></i> Create Event
+          </button>
+        </div>
+
+        <div class="cal-layout">
+          <!-- Calendar Grid -->
+          <div class="cal-card">
+            <div class="cal-hd">
+              <button class="cal-nav" onclick="prevMonth()"><i class="bi bi-chevron-left"></i></button>
+              <h3 class="cal-title" id="calTitle">Month</h3>
+              <button class="cal-nav" onclick="nextMonth()"><i class="bi bi-chevron-right"></i></button>
+            </div>
+            <div class="cal-weekdays">
+              <div class="cal-wd">Sun</div><div class="cal-wd">Mon</div><div class="cal-wd">Tue</div>
+              <div class="cal-wd">Wed</div><div class="cal-wd">Thu</div><div class="cal-wd">Fri</div><div class="cal-wd">Sat</div>
+            </div>
+            <div class="cal-days" id="calGrid"></div>
+          </div>
+
+          <!-- Right column -->
+          <div>
+            <!-- Selected day events -->
+            <div class="ev-list-card" style="margin-bottom:var(--s5);">
+              <div class="ev-list-hd">
+                <h3 style="font-size:13.5px;font-weight:600;" id="selDayTitle">Click a day to see events</h3>
+              </div>
+              <div id="selDayEvs">
+                <p style="padding:14px;font-size:13px;color:var(--text-3);">Click on a calendar date to see its events.</p>
+              </div>
+            </div>
+
+            <!-- Upcoming events -->
+            <div class="ev-list-card">
+              <div class="ev-list-hd">
+                <h3 style="font-size:13.5px;font-weight:600;">Upcoming Events</h3>
+              </div>
+              <div id="upcomingList"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ANNOUNCEMENTS (Admin) ───────────────────────── -->
+      <div class="page-section" id="sec-announcements">
+        <div class="page-hd">
+          <div>
+            <h1>Announcements</h1>
+            <p>Post news and updates visible to your entire team</p>
+          </div>
+        </div>
+        <div id="annCnt"></div>
+      </div>
+
+      <!-- ── MEETING REQUESTS (Admin) ───────────────────── -->
+      <div class="page-section" id="sec-meetings">
+        <div class="page-hd">
+          <div>
+            <h1>Meeting Requests</h1>
+            <p>Review and respond to 1-on-1 appointment requests from your team</p>
+          </div>
+        </div>
+        <div id="adminMtgCnt"></div>
+      </div>
+
+      <!-- ── REQUEST MEETING (Employee) ─────────────────── -->
+      <div class="page-section" id="sec-request-meeting">
+        <div class="page-hd">
+          <div>
+            <h1>Request a Meeting</h1>
+            <p>Schedule a 1-on-1 appointment with your organisation administrator</p>
+          </div>
+        </div>
+        <div id="reqMtgCnt"></div>
+      </div>
+
+      <!-- ── NEWS FEED (Employee) ────────────────────────── -->
+      <div class="page-section" id="sec-newsfeed">
+        <div class="page-hd">
+          <div>
+            <h1>News Feed</h1>
+            <p>Stay updated with announcements from your organisation</p>
+          </div>
+        </div>
+        <div id="newsFeedCnt"></div>
+      </div>
+
+      <!-- ── MY MEETINGS (Employee) ─────────────────────── -->
+      <div class="page-section" id="sec-my-meetings">
+        <div class="page-hd">
+          <div>
+            <h1>My Meeting Requests</h1>
+            <p>Track the status of your submitted meeting requests</p>
+          </div>
+          <button class="btn btn-outline" onclick="showSection('request-meeting')">
+            <i class="bi bi-plus-lg"></i> New Request
+          </button>
+        </div>
+        <div id="myMtgCnt"></div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════
+     CREATE EVENT MODAL
+     ═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay hidden" id="createEvModal" onclick="if(event.target===this)closeCreateEvent()">
+  <div class="modal">
+    <div class="modal-hd">
+      <h2 style="font-size:1.125rem;"><i class="bi bi-calendar-plus" style="color:var(--primary);margin-right:6px;"></i>Create Calendar Event</h2>
+      <button class="modal-close" onclick="closeCreateEvent()">✕</button>
+    </div>
+    <form id="createEvForm" onsubmit="return false;">
+      <div class="form-group">
+        <label for="evTitle">Event Title *</label>
+        <input type="text" id="evTitle" placeholder="e.g. Quarterly Team Sync">
+      </div>
+      <div class="form-group">
+        <label for="evDesc">Description</label>
+        <textarea id="evDesc" placeholder="Optional description…" style="min-height:70px;"></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="evStart">Start Date &amp; Time *</label>
+          <input type="datetime-local" id="evStart">
+        </div>
+        <div class="form-group">
+          <label for="evEnd">End Date &amp; Time *</label>
+          <input type="datetime-local" id="evEnd">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="evAssign">Assign To</label>
+        <select id="evAssign"><option value="">Org-wide (all employees)</option></select>
+      </div>
+      <div class="form-group" style="flex-direction:row;align-items:center;gap:10px;margin-bottom:var(--s8);">
+        <input type="checkbox" id="evHoliday" style="width:16px;height:16px;accent-color:var(--err);flex-shrink:0;">
+        <label for="evHoliday" style="margin-bottom:0;color:var(--text-1);">Mark as Public Holiday</label>
+      </div>
+      <div style="display:flex;gap:var(--s4);justify-content:flex-end;">
+        <button type="button" class="btn btn-ghost" onclick="closeCreateEvent()">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="submitCreateEvent()">
+          <i class="bi bi-calendar-check"></i> Create Event
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast-container" id="toasts"></div>
+
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/quotes.js"></script>
+<script src="js/ai-widget.js"></script>
+<script src="js/dashboard.js"></script>
+
+</body>
+</html>

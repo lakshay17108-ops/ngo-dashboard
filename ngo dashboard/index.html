@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NGO Connect — Secure Multi-Tenant NGO Management</title>
+  <meta name="description" content="A secure, multi-tenant digital management workspace for NGOs. Register your organisation, manage your team, calendar, and meetings all in one place.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="css/styles.css">
+  <style>
+    /* ── Auth-page overrides (guaranteed fresh, not cached) ── */
+    .auth-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 100vh;
+    }
+    .auth-hero {
+      background: linear-gradient(145deg, hsl(178,55%,18%) 0%, hsl(178,50%,28%) 60%, hsl(178,42%,38%) 100%);
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 48px 52px;
+      position: relative;
+      overflow: hidden;
+      color: #fff;
+    }
+    .auth-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(circle at 15% 75%, hsla(178,60%,52%,.30) 0%, transparent 50%),
+        radial-gradient(circle at 85% 15%, hsla(38,90%,52%,.16) 0%, transparent 42%);
+      pointer-events: none;
+    }
+    .auth-panel {
+      background: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 56px;
+      overflow-y: auto;
+    }
+    .auth-inner {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    /* Choice cards */
+    .c-card {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 18px 20px;
+      background: #fff;
+      border: 1.5px solid hsl(215,22%,88%);
+      border-radius: 10px;
+      cursor: pointer;
+      text-align: left;
+      font-family: 'Inter', sans-serif;
+      transition: border-color .15s, background .15s, transform .15s, box-shadow .15s;
+      box-sizing: border-box;
+      margin-bottom: 12px;
+    }
+    .c-card:last-child { margin-bottom: 0; }
+    .c-card:hover {
+      border-color: hsl(178,50%,28%);
+      background: hsl(178,40%,96%);
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(0,0,0,.09);
+    }
+    .c-icon {
+      width: 52px;
+      height: 52px;
+      background: hsl(210,22%,96%);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      flex-shrink: 0;
+      transition: background .15s;
+    }
+    .c-card:hover .c-icon { background: hsl(178,40%,90%); }
+    .c-body { flex: 1; min-width: 0; }
+    .c-title { font-size: 14.5px; font-weight: 600; color: hsl(215,30%,14%); margin-bottom: 3px; }
+    .c-desc  { font-size: 12.5px; color: hsl(215,15%,48%); line-height: 1.4; }
+    .c-arrow { color: hsl(215,12%,68%); font-size: 14px; flex-shrink: 0; }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      color: hsl(215,15%,48%);
+      padding: 0;
+      margin-bottom: 24px;
+      text-decoration: none;
+      transition: color .15s;
+    }
+    .back-link:hover { color: hsl(178,50%,28%); }
+
+    /* Form inputs */
+    .f-group { margin-bottom: 16px; }
+    .f-label {
+      display: block;
+      font-size: 12.5px;
+      font-weight: 500;
+      color: hsl(215,15%,48%);
+      margin-bottom: 6px;
+      letter-spacing: .01em;
+    }
+    .f-input {
+      width: 100%;
+      padding: 10px 13px;
+      border: 1.5px solid hsl(215,22%,88%);
+      border-radius: 7px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      color: hsl(215,30%,14%);
+      background: #fff;
+      outline: none;
+      box-sizing: border-box;
+      transition: border-color .15s, box-shadow .15s;
+      -webkit-appearance: none;
+    }
+    .f-input:focus {
+      border-color: hsl(178,50%,28%);
+      box-shadow: 0 0 0 3px hsla(178,50%,28%,.12);
+    }
+    .f-input::placeholder { color: hsl(215,12%,68%); }
+    .f-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+    /* Buttons */
+    .btn-submit {
+      width: 100%;
+      padding: 11px 20px;
+      background: hsl(178,50%,28%);
+      color: #fff;
+      border: none;
+      border-radius: 7px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, transform .15s;
+      box-shadow: 0 4px 20px hsla(178,50%,28%,.28);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .btn-submit:hover { background: hsl(178,42%,36%); transform: translateY(-1px); }
+    .btn-submit:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+
+    /* Error alert */
+    .f-err {
+      padding: 10px 14px;
+      background: hsl(0,65%,96%);
+      border: 1px solid hsl(0,65%,84%);
+      border-radius: 7px;
+      color: hsl(0,65%,50%);
+      font-size: 13px;
+      font-weight: 500;
+      margin-bottom: 16px;
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .f-err.show { display: flex; }
+
+    /* Code reveal */
+    .code-box {
+      background: hsl(178,40%,96%);
+      border: 1.5px dashed hsl(178,50%,28%);
+      border-radius: 10px;
+      padding: 20px 24px;
+      text-align: center;
+      margin-bottom: 16px;
+    }
+    .code-box-lbl { font-size: 11px; font-weight: 700; color: hsl(178,50%,28%); text-transform: uppercase; letter-spacing: .07em; margin-bottom: 8px; }
+    .code-box-val { font-size: 2.25rem; font-weight: 800; color: hsl(178,50%,28%); letter-spacing: .18em; }
+    .code-box-sub { font-size: 12px; color: hsl(215,12%,68%); margin-top: 6px; }
+
+    /* Section footer link */
+    .f-footer { text-align: center; margin-top: 20px; font-size: 13.5px; color: hsl(215,15%,48%); }
+    .f-footer a { color: hsl(178,50%,28%); font-weight: 600; text-decoration: none; }
+    .f-footer a:hover { text-decoration: underline; }
+
+    /* Divider */
+    .f-divider { height: 1px; background: hsl(215,22%,92%); margin: 20px 0; }
+
+    /* Hidden util */
+    .vh { display: none !important; }
+
+    @media (max-width: 900px) {
+      .auth-layout { grid-template-columns: 1fr; }
+      .auth-hero { display: none; }
+      .auth-panel { padding: 48px 32px; }
+    }
+    @media (max-width: 480px) {
+      .auth-panel { padding: 32px 20px; }
+      .f-row { grid-template-columns: 1fr; }
+    }
+
+    @keyframes spin { from { transform:rotate(0deg); } to { transform:rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="auth-layout">
+
+  <!-- ── Left Hero ──────────────────────────────────────── -->
+  <div class="auth-hero">
+    <div style="display:flex;align-items:center;gap:11px;position:relative;z-index:1;">
+      <div style="width:38px;height:38px;background:rgba(255,255,255,.15);border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:19px;backdrop-filter:blur(8px);">🤝</div>
+      <span style="font-size:1rem;font-weight:700;color:#fff;">NGO Connect</span>
+    </div>
+
+    <div style="position:relative;z-index:1;">
+      <h1 style="font-size:clamp(1.65rem,2.5vw,2.6rem);font-weight:800;color:#fff;letter-spacing:-.035em;line-height:1.17;margin-bottom:16px;">
+        Manage Your NGO<br>with Purpose
+      </h1>
+      <p style="font-size:.9375rem;color:rgba(255,255,255,.72);line-height:1.75;max-width:340px;">
+        A unified, secure workspace for NGOs — coordinate your team, calendar, meetings, and announcements from one trusted platform.
+      </p>
+    </div>
+
+    <div style="position:relative;z-index:1;border-left:3px solid hsl(38,90%,52%);padding-left:18px;">
+      <p id="heroQuoteText" style="font-size:.9375rem;color:rgba(255,255,255,.88);font-style:italic;line-height:1.7;margin-bottom:6px;">"…"</p>
+      <p id="heroQuoteAuthor" style="font-size:12.5px;color:rgba(255,255,255,.48);font-weight:500;">—</p>
+    </div>
+  </div>
+
+  <!-- ── Right Panel ────────────────────────────────────── -->
+  <div class="auth-panel">
+    <div class="auth-inner">
+
+      <!-- ══ HOME ══════════════════════════════════════════ -->
+      <div id="view-home">
+        <div style="margin-bottom:32px;">
+          <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Get started</h2>
+          <p style="font-size:13.5px;color:hsl(215,15%,48%);">Choose how you'd like to continue with NGO Connect</p>
+        </div>
+
+        <button class="c-card" onclick="showView('ngo')">
+          <div class="c-icon">🏢</div>
+          <div class="c-body">
+            <div class="c-title">Register NGO</div>
+            <div class="c-desc">Create a new organisation and become the administrator</div>
+          </div>
+          <i class="bi bi-chevron-right c-arrow"></i>
+        </button>
+
+        <button class="c-card" onclick="showView('employee')">
+          <div class="c-icon">👤</div>
+          <div class="c-body">
+            <div class="c-title">Join an NGO</div>
+            <div class="c-desc">Join your organisation as a team member or volunteer</div>
+          </div>
+          <i class="bi bi-chevron-right c-arrow"></i>
+        </button>
+
+        <p class="f-footer" style="margin-top:28px;">
+          Already have an account? <a href="#" onclick="showView('login');return false;">Sign in</a>
+        </p>
+      </div>
+
+      <!-- ══ LOGIN ══════════════════════════════════════════ -->
+      <div id="view-login" class="vh">
+        <button class="back-link" onclick="showView('home')">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+
+        <div style="margin-bottom:28px;">
+          <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Welcome back</h2>
+          <p style="font-size:13.5px;color:hsl(215,15%,48%);">Sign in to your organisation workspace</p>
+        </div>
+
+        <div class="f-err" id="loginErr"><i class="bi bi-exclamation-triangle-fill"></i> <span id="loginErrMsg"></span></div>
+
+        <div class="f-group">
+          <label class="f-label" for="loginEmail">Email Address</label>
+          <input class="f-input" type="email" id="loginEmail" placeholder="you@organisation.org" autocomplete="email">
+        </div>
+        <div class="f-group" style="margin-bottom:24px;">
+          <label class="f-label" for="loginPwd">Password</label>
+          <input class="f-input" type="password" id="loginPwd" placeholder="Your password" autocomplete="current-password">
+        </div>
+
+        <button class="btn-submit" id="loginBtn" onclick="doLogin()">
+          Sign In <i class="bi bi-arrow-right"></i>
+        </button>
+
+        <p class="f-footer">
+          Don't have an account? <a href="#" onclick="showView('home');return false;">Get started</a>
+        </p>
+      </div>
+
+      <!-- ══ REGISTER NGO ════════════════════════════════════ -->
+      <div id="view-ngo" class="vh">
+        <button class="back-link" onclick="showView('home')">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Register your NGO</h2>
+          <p style="font-size:13.5px;color:hsl(215,15%,48%);">Create a new organisation and become the administrator</p>
+        </div>
+
+        <div class="f-err" id="ngoErr"><i class="bi bi-exclamation-triangle-fill"></i> <span id="ngoErrMsg"></span></div>
+
+        <!-- Success reveal -->
+        <div id="ngoSuccess" class="vh">
+          <div class="code-box">
+            <div class="code-box-lbl">Your Organisation Code</div>
+            <div class="code-box-val" id="generatedCode">—</div>
+            <div class="code-box-sub">Share this with your team members so they can join</div>
+          </div>
+          <button class="btn-submit" onclick="window.location.href='dashboard.html'">
+            Go to Dashboard <i class="bi bi-arrow-right"></i>
+          </button>
+        </div>
+
+        <div id="ngoFields">
+          <div class="f-group">
+            <label class="f-label" for="ngoOrgName">Organisation Name *</label>
+            <input class="f-input" type="text" id="ngoOrgName" placeholder="e.g. Green Earth Initiative">
+          </div>
+          <div class="f-row">
+            <div class="f-group">
+              <label class="f-label" for="ngoAdminName">Your Full Name *</label>
+              <input class="f-input" type="text" id="ngoAdminName" placeholder="Your name">
+            </div>
+            <div class="f-group">
+              <label class="f-label" for="ngoPhone">Phone Number</label>
+              <input class="f-input" type="tel" id="ngoPhone" placeholder="+91 98765 43210">
+            </div>
+          </div>
+          <div class="f-group">
+            <label class="f-label" for="ngoEmail">Official Email *</label>
+            <input class="f-input" type="email" id="ngoEmail" placeholder="contact@yourorg.org" autocomplete="email">
+          </div>
+          <div class="f-group">
+            <label class="f-label" for="ngoAddress">Street Address</label>
+            <input class="f-input" type="text" id="ngoAddress" placeholder="Street / locality">
+          </div>
+          <div class="f-row">
+            <div class="f-group">
+              <label class="f-label" for="ngoCity">City *</label>
+              <input class="f-input" type="text" id="ngoCity" placeholder="City">
+            </div>
+            <div class="f-group">
+              <label class="f-label" for="ngoState">State</label>
+              <input class="f-input" type="text" id="ngoState" placeholder="State">
+            </div>
+          </div>
+          <div class="f-row">
+            <div class="f-group">
+              <label class="f-label" for="ngoPincode">Pincode</label>
+              <input class="f-input" type="text" id="ngoPincode" placeholder="000000">
+            </div>
+            <div class="f-group">
+              <label class="f-label" for="ngoPwd">Password *</label>
+              <input class="f-input" type="password" id="ngoPwd" placeholder="Min. 6 characters">
+            </div>
+          </div>
+
+          <button class="btn-submit" id="ngoBtn" onclick="doRegisterNGO()">
+            Create Organisation <i class="bi bi-building"></i>
+          </button>
+
+          <p class="f-footer">
+            Already have an account? <a href="#" onclick="showView('login');return false;">Sign in</a>
+          </p>
+        </div>
+      </div>
+
+      <!-- ══ JOIN NGO ════════════════════════════════════════ -->
+      <div id="view-employee" class="vh">
+        <button class="back-link" onclick="showView('home')">
+          <i class="bi bi-arrow-left"></i> Back
+        </button>
+
+        <div style="margin-bottom:24px;">
+          <h2 style="font-size:1.5rem;font-weight:800;letter-spacing:-.03em;margin-bottom:6px;">Join your NGO</h2>
+          <p style="font-size:13.5px;color:hsl(215,15%,48%);">Request to join an organisation as a team member or volunteer</p>
+        </div>
+
+        <div class="f-err" id="empErr"><i class="bi bi-exclamation-triangle-fill"></i> <span id="empErrMsg"></span></div>
+
+        <div class="f-group">
+          <label class="f-label" for="empCode">Organisation Code *</label>
+          <input class="f-input" type="text" id="empCode" placeholder="e.g. HHF12345"
+                 style="text-transform:uppercase;letter-spacing:.12em;font-size:1.1rem;font-weight:700;text-align:center;"
+                 oninput="this.value=this.value.toUpperCase()">
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="empName">Full Name *</label>
+          <input class="f-input" type="text" id="empName" placeholder="Your full name">
+        </div>
+        <div class="f-group">
+          <label class="f-label" for="empEmail">Email Address *</label>
+          <input class="f-input" type="email" id="empEmail" placeholder="you@email.com" autocomplete="email">
+        </div>
+        <div class="f-group" style="margin-bottom:24px;">
+          <label class="f-label" for="empPwd">Password *</label>
+          <input class="f-input" type="password" id="empPwd" placeholder="Min. 6 characters">
+        </div>
+
+        <button class="btn-submit" id="empBtn" onclick="doRegisterEmployee()">
+          Request to Join <i class="bi bi-person-plus"></i>
+        </button>
+
+        <p style="text-align:center;margin-top:10px;font-size:12px;color:hsl(215,12%,68%);line-height:1.6;">
+          Your request will be reviewed and approved by your organisation's admin.
+        </p>
+        <p class="f-footer">
+          Already have an account? <a href="#" onclick="showView('login');return false;">Sign in</a>
+        </p>
+      </div>
+
+    </div><!-- /.auth-inner -->
+  </div><!-- /.auth-panel -->
+</div><!-- /.auth-layout -->
+
+<div class="toast-container" id="toasts"></div>
+
+<script src="js/db.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/quotes.js"></script>
+<script>
+  var VIEWS = ['home', 'login', 'ngo', 'employee'];
+
+  function showView(id) {
+    VIEWS.forEach(function(v) {
+      var el = document.getElementById('view-' + v);
+      if (el) {
+        if (v === id) { el.classList.remove('vh'); }
+        else          { el.classList.add('vh'); }
+      }
+    });
+    // Clear all errors
+    ['loginErr','ngoErr','empErr'].forEach(function(eid) {
+      var e = document.getElementById(eid);
+      if (e) e.classList.remove('show');
+    });
+    document.querySelector('.auth-panel').scrollTop = 0;
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    DB.seed();
+    if (Auth.getCurrentUser()) { window.location.href = 'dashboard.html'; return; }
+    Quotes.render('heroQuoteText', 'heroQuoteAuthor');
+    document.getElementById('loginPwd').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doLogin();
+    });
+    document.getElementById('empPwd').addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') doRegisterEmployee();
+    });
+  });
+
+  function showErr(errId, msgId, msg) {
+    var err = document.getElementById(errId);
+    var msgEl = document.getElementById(msgId);
+    if (msgEl) msgEl.textContent = msg;
+    if (err) err.classList.add('show');
+    if (err) err.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  function setBtn(id, loading, label) {
+    var b = document.getElementById(id);
+    if (!b) return;
+    b.disabled = loading;
+    b.innerHTML = loading
+      ? '<i class="bi bi-arrow-clockwise" style="animation:spin .8s linear infinite;"></i> Processing…'
+      : label;
+  }
+
+  /* ── Login ─────────────────────────────────────────── */
+  function doLogin() {
+    var email = document.getElementById('loginEmail').value.trim();
+    var pwd   = document.getElementById('loginPwd').value;
+    document.getElementById('loginErr').classList.remove('show');
+
+    if (!email || !pwd) { showErr('loginErr','loginErrMsg','Please enter your email and password.'); return; }
+
+    setBtn('loginBtn', true);
+    setTimeout(function() {
+      try {
+        Auth.login(email, pwd);
+        window.location.href = 'dashboard.html';
+      } catch(e) {
+        showErr('loginErr','loginErrMsg', e.message);
+        setBtn('loginBtn', false, 'Sign In <i class="bi bi-arrow-right"></i>');
+      }
+    }, 350);
+  }
+
+  /* ── Register NGO ──────────────────────────────────── */
+  function doRegisterNGO() {
+    var d = {
+      orgName:  document.getElementById('ngoOrgName').value.trim(),
+      name:     document.getElementById('ngoAdminName').value.trim(),
+      phone:    document.getElementById('ngoPhone').value.trim(),
+      email:    document.getElementById('ngoEmail').value.trim(),
+      address:  document.getElementById('ngoAddress').value.trim(),
+      city:     document.getElementById('ngoCity').value.trim(),
+      state:    document.getElementById('ngoState').value.trim(),
+      pincode:  document.getElementById('ngoPincode').value.trim(),
+      password: document.getElementById('ngoPwd').value,
+    };
+    document.getElementById('ngoErr').classList.remove('show');
+
+    if (!d.orgName || !d.name || !d.email || !d.city || !d.password) {
+      showErr('ngoErr','ngoErrMsg','Please fill in all required fields (marked *).'); return;
+    }
+    if (d.password.length < 6) {
+      showErr('ngoErr','ngoErrMsg','Password must be at least 6 characters.'); return;
+    }
+
+    setBtn('ngoBtn', true);
+    setTimeout(function() {
+      try {
+        var result = Auth.registerNGO(d);
+        document.getElementById('ngoFields').classList.add('vh');
+        document.getElementById('generatedCode').textContent = result.ngo.unique_code;
+        document.getElementById('ngoSuccess').classList.remove('vh');
+      } catch(e) {
+        showErr('ngoErr','ngoErrMsg', e.message);
+        setBtn('ngoBtn', false, 'Create Organisation <i class="bi bi-building"></i>');
+      }
+    }, 350);
+  }
+
+  /* ── Register Employee ─────────────────────────────── */
+  function doRegisterEmployee() {
+    var d = {
+      ngoCode:  document.getElementById('empCode').value.trim().toUpperCase(),
+      name:     document.getElementById('empName').value.trim(),
+      email:    document.getElementById('empEmail').value.trim(),
+      password: document.getElementById('empPwd').value,
+    };
+    document.getElementById('empErr').classList.remove('show');
+
+    if (!d.ngoCode || !d.name || !d.email || !d.password) {
+      showErr('empErr','empErrMsg','Please fill in all fields.'); return;
+    }
+    if (d.password.length < 6) {
+      showErr('empErr','empErrMsg','Password must be at least 6 characters.'); return;
+    }
+
+    setBtn('empBtn', true);
+    setTimeout(function() {
+      try {
+        Auth.registerEmployee(d);
+        window.location.href = 'dashboard.html';
+      } catch(e) {
+        showErr('empErr','empErrMsg', e.message);
+        setBtn('empBtn', false, 'Request to Join <i class="bi bi-person-plus"></i>');
+      }
+    }, 350);
+  }
+</script>
+</body>
+</html>
